@@ -12,5 +12,6 @@ transforms.add_validate(Schema({
 def add_container_env(config, tasks):
     for task in tasks:
         task["task"]["payload"]["env"]["container"] = "docker"
+        task["attributes"]["always_target"] = False
 
         yield task
