@@ -133,6 +133,7 @@ def publish(config, task):
                 "VCS_HEAD_REF": config.params["head_ref"].removeprefix('refs/heads/'),
                 "DOCKER_REPO": task.pop("docker-repo")
             },
+            "privileged": True,
             "volumes": [
                 "/builds/worker/checkouts",
                 "/workspace/cache",
@@ -140,7 +141,7 @@ def publish(config, task):
             "caches": [
                 {
                     "type": "persistent",
-                    "name": "docker.build.{}".format(task["name"],
+                    "name": "docker.build.{}".format(task["name"]),
                     "mount-point": "/workspace/cache",
                 }
             ],
