@@ -101,6 +101,7 @@ def publish(config, task):
         "run": {
             "using": "run-task",
             "command": "/kaniko-bootstrap/build-image && bash /usr/local/bin/push_image.sh",
+            "run-as-root": True,
         },
         "dependencies": {
             "build": "{}-build".format(config.kind),
