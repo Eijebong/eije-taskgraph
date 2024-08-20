@@ -64,7 +64,7 @@ def build(config, task):
             ]
         },
         "run-on-tasks-for": ["github-push"],
-        "run-on-git-branches": ["main", "prod", "ci"]
+        "run-on-git-branches": ["main", "prod", "ci"],
         "worker-type": task['worker-type-build'],
         "description": "Run cargo build",
         "run": {
@@ -97,7 +97,7 @@ def publish(config, task):
         "worker-type": task['worker-type-build'],
         "description": "Publish docker image",
         "run-on-tasks-for": ["github-push"],
-        "run-on-git-branches": ["main", "prod", "ci"]
+        "run-on-git-branches": ["main", "prod", "ci"],
         "run": {
             "using": "run-task",
             "command": "/kaniko-bootstrap/build-image && bash /usr/local/bin/push_image.sh",
