@@ -147,9 +147,7 @@ def publish(config, original_task):
             "command": "/kaniko-bootstrap/build-image && bash /usr/local/bin/push_image.sh",
             "run-as-root": True,
         }
-        task["dependencies"] = {
-            "build": "{}-build".format(config.kind),
-        }
+        task["dependencies"]["build"] = "{}-build".format(config.kind)
         task["fetches"] = {
             "build": [
                 { "artifact": "build-result", "extract": False},
