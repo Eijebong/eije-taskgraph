@@ -135,7 +135,15 @@ def publish(config, task):
             },
             "volumes": [
                 "/builds/worker/checkouts",
-            ]
+                "/workspace/cache",
+            ],
+            "caches": [
+                {
+                    "type": "persistent",
+                    "name": "docker.build.{}".format(task["name"],
+                    "mount-point": "/workspace/cache",
+                }
+            ],
         },
         "worker-type": task['worker-type-build'],
         "description": "Publish docker image",
