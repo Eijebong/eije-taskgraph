@@ -24,7 +24,15 @@ def lint(config, task):
             "max-run-time": 1800,
             "env": {
                 "CARGO_TARGET_DIR": "/builds/worker/target",
+                "CARGO_HOME": "/builds/worker/.cargo",
             },
+            "caches": [
+                {
+                    "type": "persistent",
+                    "name": "rust.index",
+                    "mount-point": "/builds/worker/.cargo/registry",
+                }
+            ]
         },
         "worker-type": task['worker-type-fmt'],
         "description": "Run cargo fmt",
@@ -43,12 +51,18 @@ def lint(config, task):
             "max-run-time": 1800,
             "env": {
                 "CARGO_TARGET_DIR": "/builds/worker/target",
+                "CARGO_HOME": "/builds/worker/.cargo",
             },
             "caches": [
                 {
                     "type": "persistent",
                     "name": "rust.check.{}".format(task["name"]),
                     "mount-point": "/builds/worker/target",
+                },
+                {
+                    "type": "persistent",
+                    "name": "rust.index",
+                    "mount-point": "/builds/worker/.cargo/registry",
                 }
             ]
         },
@@ -69,6 +83,7 @@ def build(config, task):
             "docker-image": {"in-tree": "rust-builder"},
             "env": {
                 "CARGO_TARGET_DIR": "/builds/worker/target",
+                "CARGO_HOME": "/builds/worker/.cargo",
             },
             "max-run-time": 1800,
             "artifacts": [
@@ -83,6 +98,11 @@ def build(config, task):
                     "type": "persistent",
                     "name": "rust.build.{}".format(task["name"]),
                     "mount-point": "/builds/worker/target",
+                },
+                {
+                    "type": "persistent",
+                    "name": "rust.index",
+                    "mount-point": "/builds/worker/.cargo/registry",
                 }
             ]
         },
