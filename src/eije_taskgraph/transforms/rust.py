@@ -58,7 +58,7 @@ def build(config, task):
             "artifacts": [
                 {
                     "type": "file",
-                    "name": "public/build-result",
+                    "name": "public/build/build-result",
                     "path": task["build-result"],
                 },
             ]
