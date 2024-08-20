@@ -118,42 +118,42 @@ def build(config, task):
 
     yield build_task
 
-def publish(config, original_task):
-    prepublish_task = [{"name": original_task["name"]}]
-    for task in docker_sequence(config, prepublish_task):
-        del task["worker"]["implementation"]
-        del task["cache"]
-
-        task["name"] = "publish"
-        task["scopes"] = ["secrets:get:github_deploy"]
-        task["worker"]["docker-image"] = "ghcr.io/eijebong/taskcluster-images/push-image:main"
-        task["worker"]["env"].update({
-                "NAME": original_task["name"],
+def publish(config, task):
+    publish_task = {
+        "name": "publish",
+        "scopes": ["secrets:get:github_deploy"],
+        "worker": {
+            "docker-image": "ghcr.io/eijebong/taskcluster-images/push-image:main",
+            "max-run-time": 1800,
+            "taskcluster-proxy": True,
+            "env": {
+                "NAME": task["name"],
                 "VCS_HEAD_REPOSITORY": config.params["head_repository"],
                 "VCS_HEAD_REV": config.params["head_rev"],
                 "VCS_HEAD_REF": config.params["head_ref"].removeprefix('refs/heads/'),
-                "DOCKER_REPO": original_task.pop("docker-repo")
-            }
-        )
-        task["worker"]["volumes"] = [
+                "DOCKER_REPO": task.pop("docker-repo")
+            },
+            "volumes": [
                 "/builds/worker/checkouts",
             ]
-        task["worker-type"] = original_task['worker-type-build']
-        task["description"] = "Publish docker image"
-        task["run-on-tasks-for"] = ["github-push"]
-        task["run-on-git-branches"] = ["main", "prod", "ci"]
-        task["run"] = {
+        },
+        "worker-type": task['worker-type-build'],
+        "description": "Publish docker image",
+        "run-on-tasks-for": ["github-push"],
+        "run-on-git-branches": ["main", "prod", "ci"],
+        "run": {
             "using": "run-task",
-            "command": "/kaniko-bootstrap/build-image && bash /usr/local/bin/push_image.sh",
+            "command": "bash /usr/local/bin/push_image.sh",
             "run-as-root": True,
-        }
-        task["dependencies"] = {
-            "build": "{}-build".format(config.kind)
-        }
-        task["fetches"] = {
+        },
+        "dependencies": {
+            "build": "{}-build".format(config.kind),
+        },
+        "fetches": {
             "build": [
                 { "artifact": "build-result", "extract": False},
             ],
-        }
+        },
+    }
 
-        yield task
+    yield publish_task
