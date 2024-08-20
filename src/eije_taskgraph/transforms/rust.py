@@ -123,7 +123,7 @@ def publish(config, task):
         "name": "publish",
         "scopes": ["secrets:get:github_deploy"],
         "worker": {
-            "docker-image": "ghcr.io/eijebong/taskcluster-images/push-image:main",
+            "docker-image": "ghcr.io/eijebong/taskcluster-images/push-rust-image:main",
             "max-run-time": 1800,
             "taskcluster-proxy": True,
             "env": {
