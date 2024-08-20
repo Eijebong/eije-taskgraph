@@ -144,6 +144,7 @@ def publish(config, task):
         "run": {
             "using": "run-task",
             "command": "bash /usr/local/bin/push_image.sh",
+            "run-as-root": True,
         },
         "dependencies": {
             "build": "{}-build".format(config.kind),
