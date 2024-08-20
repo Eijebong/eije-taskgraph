@@ -38,6 +38,13 @@ def lint(config, task):
         "worker": {
             "docker-image": {"in-tree": "rust-builder"},
             "max-run-time": 1800,
+            "caches": [
+                {
+                    "type": "persistent",
+                    "name": "rust.check.{}".format(task["name"]),
+                    "mount-point": "/builds/worker/checkouts/vcs/target",
+                }
+            ]
         },
         "worker-type": task['worker-type-build'],
         "description": "Run cargo clippy",
@@ -61,6 +68,13 @@ def build(config, task):
                     "name": "public/build/build-result",
                     "path": task["build-result"],
                 },
+            ],
+            "caches": [
+                {
+                    "type": "persistent",
+                    "name": "rust.build.{}".format(task["name"]),
+                    "mount-point": "/builds/worker/checkouts/vcs/target",
+                }
             ]
         },
         "run-on-tasks-for": ["github-push"],
