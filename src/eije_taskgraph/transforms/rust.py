@@ -119,7 +119,7 @@ def build(config, task):
     yield build_task
 
 def publish(config, original_task):
-    prepublish_task = [{"name": original_task["name"], "parent": "rust-builder"}]
+    prepublish_task = [{"name": original_task["name"]}]
     for task in docker_sequence(config, prepublish_task):
         del task["worker"]["implementation"]
         del task["cache"]
