@@ -12,6 +12,8 @@ def add_rust_tasks(config, tasks):
         run_tasks.extend(lint(config, task))
         run_tasks.extend(build(config, task))
         run_tasks.extend(publish(config, task))
+        if task.get('with-tests'):
+            run_tasks.extend(tests(config, task))
 
     yield from rt_sequence(config, run_tasks)
 
@@ -166,3 +168,36 @@ def publish(config, task):
     }
 
     yield publish_task
+
+def tests(config, task):
+    tests_task = {
+        "name": "test",
+        "worker": {
+            "docker-image": {"in-tree": "rust-builder"},
+            "max-run-time": 1800,
+            "env": {
+                "CARGO_TARGET_DIR": "/builds/worker/target",
+                "CARGO_HOME": "/builds/worker/.cargo",
+            },
+            "caches": [
+                {
+                    "type": "persistent",
+                    "name": "rust.build.{}".format(task["name"]),
+                    "mount-point": "/builds/worker/target",
+                },
+                {
+                    "type": "persistent",
+                    "name": "rust.index",
+                    "mount-point": "/builds/worker/.cargo/registry",
+                }
+            ]
+        },
+        "worker-type": task['worker-type-build'],
+        "description": "Run cargo test",
+        "run": {
+            "using": "run-task",
+            "command": "cd $VCS_PATH && cargo test",
+        }
+    }
+
+    yield tests_task
