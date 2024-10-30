@@ -37,7 +37,7 @@ def set_push_environment(config, tasks):
         task["description"] = "Upload container {}".format(container_name)
 
         deps = task.setdefault("dependencies", {})
-        deps["image"] = "build-docker-image-{}".format(container_name)
+        deps["image"] = "docker-image-{}".format(container_name)
 
         fetches = task.setdefault("fetches", {})
         fetches["image"] = [{ "artifact": "image.tar.zst", "extract": False }]
