@@ -49,11 +49,28 @@ def set_push_environment(config, tasks):
         artifacts = worker.setdefault("artifacts", [])
         artifacts.append({"type": "directory", "name": "public/", "path": "/builds/worker/artifacts/"})
 
-        #env:
-        #  DOCKER_REPO: ghcr.io/eijebong/bananium.rs
         run = task.setdefault("run", {})
         run["using"] = "run-task"
         run["use-caches"] = False
         run["command"] = "bash /usr/local/bin/push_image.sh"
         yield task
 
+
+@transforms.add
+def update_argocd(config, tasks):
+    tasks = list(tasks)
+    yield from tasks
+    yield from argocd_webhook_task(tasks)
+
+
+def argocd_webhook_task(tasks):
+    yield {
+        "name": "ArgoCD webhook",
+        "description": "",
+        "worker-type": "argocd-webhook",
+        "label": "argocd-webhook",
+        "run": {
+            "using": "argocd-webhook",
+        },
+        "dependencies": {task["label"]: task["label"] for task in tasks}
+    }
