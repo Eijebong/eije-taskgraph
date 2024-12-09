@@ -22,10 +22,10 @@ def register(graph_config):
             "worker-type": "linux-medium",
         },
         "argocd-webhook": {
-            "provisioner": "ap",
+            "provisioner": "scriptworker",
             "implementation": "argocd-webhook",
             "os": "scriptworker",
-            "worker-type": "scriptworker-argocd-webhook",
+            "worker-type": "argocd-webhook",
         },
     }
 
