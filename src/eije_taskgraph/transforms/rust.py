@@ -168,6 +168,20 @@ def publish(config, task):
     }
 
     yield publish_task
+    yield from argocd_webhook_task(publish_task)
+
+
+def argocd_webhook_task(publish_task):
+    yield {
+        "name": "ArgoCD webhook",
+        "description": "",
+        "worker-type": "argocd-webhook",
+        "label": "argocd-webhook",
+        "run": {
+            "using": "argocd-webhook",
+        },
+        "dependencies": {"rust-publish": "rust-publish"}
+    }
 
 def tests(config, task):
     tests_task = {
