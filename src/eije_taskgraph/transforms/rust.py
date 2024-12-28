@@ -10,8 +10,9 @@ def add_rust_tasks(config, tasks):
     run_tasks = []
     for task in tasks:
         run_tasks.extend(lint(config, task))
-        run_tasks.extend(build(config, task))
-        run_tasks.extend(publish(config, task))
+        if not task.get('tests-only'):
+            run_tasks.extend(build(config, task))
+            run_tasks.extend(publish(config, task))
         if task.get('with-tests'):
             run_tasks.extend(tests(config, task))
 
