@@ -181,7 +181,8 @@ def argocd_webhook_task(publish_task):
         "run": {
             "using": "argocd-webhook",
         },
-        "dependencies": {"rust-publish": "rust-publish"}
+        "dependencies": {"rust-publish": "rust-publish"},
+        "if-dependencies": ["rust-publish"],
     }
 
 def tests(config, task):
