@@ -6,7 +6,7 @@ transforms = TransformSequence()
 def common(config, tasks):
     for task in tasks:
         caps = task["task"].setdefault("payload", {}).setdefault("capabilities", {})
-        caps["containerEngine"] = "podman"
+        caps["containerEngine"] = "docker"
 
         yield task
 
