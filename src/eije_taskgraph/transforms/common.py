@@ -4,9 +4,7 @@ transforms = TransformSequence()
 
 @transforms.add
 def common(config, tasks):
-    for task in tasks:
-        caps = task["task"].setdefault("payload", {}).setdefault("capabilities", {})
-        caps["containerEngine"] = "docker"
-
-        yield task
+    # This used to set containerEngine but is now empty.
+    # I'm keeping it in case I need something common to all my tasks again
+    yield from tasks
 
