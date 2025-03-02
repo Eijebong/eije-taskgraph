@@ -29,13 +29,7 @@ def lint(config, task):
                 "CARGO_TARGET_DIR": "/builds/worker/target",
                 "CARGO_HOME": "/builds/worker/.cargo",
             },
-            "caches": [
-                {
-                    "type": "persistent",
-                    "name": "rust.index",
-                    "mount-point": "/builds/worker/.cargo/registry",
-                }
-            ]
+            "use-caches": ["checkout"],
         },
         "worker-type": task['worker-type-fmt'],
         "description": "Run cargo fmt",
@@ -56,17 +50,13 @@ def lint(config, task):
                 "CARGO_TARGET_DIR": "/builds/worker/target",
                 "CARGO_HOME": "/builds/worker/.cargo",
             },
+            "use-caches": ["checkout", "cargo"],
             "caches": [
                 {
                     "type": "persistent",
-                    "name": "rust.check.{}".format(task["name"]),
+                    "name": "rust.clippy.{}".format(task["name"]),
                     "mount-point": "/builds/worker/target",
                 },
-                {
-                    "type": "persistent",
-                    "name": "rust.index",
-                    "mount-point": "/builds/worker/.cargo/registry",
-                }
             ]
         },
         "worker-type": task['worker-type-build'],
@@ -96,17 +86,13 @@ def build(config, task):
                     "path": task["build-result"],
                 },
             ],
+            "use-caches": ["checkout", "cargo"],
             "caches": [
                 {
                     "type": "persistent",
                     "name": "rust.build.{}".format(task["name"]),
                     "mount-point": "/builds/worker/target",
                 },
-                {
-                    "type": "persistent",
-                    "name": "rust.index",
-                    "mount-point": "/builds/worker/.cargo/registry",
-                }
             ]
         },
         "run-on-tasks-for": ["github-push"],
@@ -136,17 +122,10 @@ def publish(config, task):
                 "VCS_HEAD_REF": config.params["head_ref"].removeprefix('refs/heads/'),
                 "DOCKER_REPO": task.pop("docker-repo")
             },
+            "use-caches": ["checkout"],
             "privileged": True,
             "volumes": [
                 "/builds/worker/checkouts",
-                "/workspace/cache",
-            ],
-            "caches": [
-                {
-                    "type": "persistent",
-                    "name": "docker.build.{}".format(task["name"]),
-                    "mount-point": "/workspace/cache",
-                }
             ],
         },
         "worker-type": task['worker-type-build'],
@@ -195,17 +174,13 @@ def tests(config, task):
                 "CARGO_TARGET_DIR": "/builds/worker/target",
                 "CARGO_HOME": "/builds/worker/.cargo",
             },
+            "use-caches": ["checkout", "cargo"],
             "caches": [
                 {
                     "type": "persistent",
-                    "name": "rust.build.{}".format(task["name"]),
+                    "name": "rust.test.{}".format(task["name"]),
                     "mount-point": "/builds/worker/target",
                 },
-                {
-                    "type": "persistent",
-                    "name": "rust.index",
-                    "mount-point": "/builds/worker/.cargo/registry",
-                }
             ]
         },
         "worker-type": task['worker-type-build'],

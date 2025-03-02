@@ -51,7 +51,7 @@ def set_push_environment(config, tasks):
 
         run = task.setdefault("run", {})
         run["using"] = "run-task"
-        run["use-caches"] = False
+        run["use-caches"] = []
         run["command"] = "bash /usr/local/bin/push_image.sh"
         yield task
 
