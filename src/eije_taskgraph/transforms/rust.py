@@ -29,13 +29,13 @@ def lint(config, task):
                 "CARGO_TARGET_DIR": "/builds/worker/target",
                 "CARGO_HOME": "/builds/worker/.cargo",
             },
-            "use-caches": ["checkout"],
         },
         "worker-type": task['worker-type-fmt'],
         "description": "Run cargo fmt",
         "run": {
             "using": "run-task",
             "command": "cd $VCS_PATH && cargo fmt --check",
+            "use-caches": ["checkout"],
         }
     }
 
@@ -50,7 +50,6 @@ def lint(config, task):
                 "CARGO_TARGET_DIR": "/builds/worker/target",
                 "CARGO_HOME": "/builds/worker/.cargo",
             },
-            "use-caches": ["checkout", "cargo"],
             "caches": [
                 {
                     "type": "persistent",
@@ -64,6 +63,7 @@ def lint(config, task):
         "run": {
             "using": "run-task",
             "command": "cd $VCS_PATH && cargo clippy {}".format(task.get("build-args", "")),
+            "use-caches": ["checkout", "cargo"],
         }
     }
 
@@ -86,7 +86,6 @@ def build(config, task):
                     "path": task["build-result"],
                 },
             ],
-            "use-caches": ["checkout", "cargo"],
             "caches": [
                 {
                     "type": "persistent",
@@ -102,6 +101,7 @@ def build(config, task):
         "run": {
             "using": "run-task",
             "command": "cd $VCS_PATH && cargo build --release {}".format(task.get("build-args", "")),
+            "use-caches": ["checkout", "cargo"],
         },
     }
 
@@ -122,7 +122,6 @@ def publish(config, task):
                 "VCS_HEAD_REF": config.params["head_ref"].removeprefix('refs/heads/'),
                 "DOCKER_REPO": task.pop("docker-repo")
             },
-            "use-caches": ["checkout"],
             "privileged": True,
             "volumes": [
                 "/builds/worker/checkouts",
@@ -136,6 +135,7 @@ def publish(config, task):
             "using": "run-task",
             "command": "bash /usr/local/bin/push_image.sh",
             "run-as-root": True,
+            "use-caches": ["checkout"],
         },
         "dependencies": {
             "build": "{}-build".format(config.kind),
@@ -174,7 +174,6 @@ def tests(config, task):
                 "CARGO_TARGET_DIR": "/builds/worker/target",
                 "CARGO_HOME": "/builds/worker/.cargo",
             },
-            "use-caches": ["checkout", "cargo"],
             "caches": [
                 {
                     "type": "persistent",
@@ -188,6 +187,7 @@ def tests(config, task):
         "run": {
             "using": "run-task",
             "command": "cd $VCS_PATH && cargo test",
+            "use-caches": ["checkout", "cargo"],
         }
     }
 
