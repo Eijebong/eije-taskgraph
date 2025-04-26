@@ -27,7 +27,6 @@ def lint(config, task):
             "max-run-time": 1800,
             "env": {
                 "CARGO_TARGET_DIR": "/builds/worker/target",
-                "CARGO_HOME": "/builds/worker/.cargo",
             },
         },
         "worker-type": task['worker-type-fmt'],
@@ -48,7 +47,6 @@ def lint(config, task):
             "max-run-time": 1800,
             "env": {
                 "CARGO_TARGET_DIR": "/builds/worker/target",
-                "CARGO_HOME": "/builds/worker/.cargo",
             },
             "caches": [
                 {
@@ -76,7 +74,6 @@ def build(config, task):
             "docker-image": {"in-tree": "rust-builder"},
             "env": {
                 "CARGO_TARGET_DIR": "/builds/worker/target",
-                "CARGO_HOME": "/builds/worker/.cargo",
             },
             "max-run-time": 1800,
             "artifacts": [
@@ -172,7 +169,6 @@ def tests(config, task):
             "max-run-time": 1800,
             "env": {
                 "CARGO_TARGET_DIR": "/builds/worker/target",
-                "CARGO_HOME": "/builds/worker/.cargo",
             },
             "caches": [
                 {
