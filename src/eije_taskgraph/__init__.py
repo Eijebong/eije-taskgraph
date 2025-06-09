@@ -1,5 +1,6 @@
 from taskgraph.transforms.run import run_task_using
 from taskgraph.transforms.task import payload_builder
+from voluptuous import Required
 
 def register(graph_config):
     graph_config['workers']['aliases'] = {
@@ -27,6 +28,12 @@ def register(graph_config):
             "os": "scriptworker",
             "worker-type": "argocd-webhook",
         },
+        "githubscript": {
+            "provisioner": "scriptworker",
+            "implementation": "githubscript",
+            "os": "scriptworker",
+            "worker-type": "githubscript",
+        }
     }
 
 @run_task_using("argocd-webhook", "argocd-webhook")
@@ -36,3 +43,11 @@ def run_webhook(config, task, taskdesc):
 @payload_builder("argocd-webhook", schema={})
 def build_argocd_payload(config, task, task_def):
     pass
+
+@payload_builder("githubscript-apdiff", schema={
+    Required("diff-task"): str,
+})
+def build_githubscript_apdiff(config, task, task_def):
+    task_def["payload"] = {
+        "diff-task": task["worker"]["diff-task"]
+    }
