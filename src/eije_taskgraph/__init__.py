@@ -1,5 +1,5 @@
 from taskgraph.transforms.run import run_task_using
-from taskgraph.transforms.task import payload_builder
+from taskgraph.transforms.task import payload_builder, taskref_or_string
 from voluptuous import Required
 
 def register(graph_config):
@@ -45,7 +45,7 @@ def build_argocd_payload(config, task, task_def):
     pass
 
 @payload_builder("githubscript-apdiff", schema={
-    Required("diff-task"): str,
+    Required("diff-task"): taskref_or_string,
 })
 def build_githubscript_apdiff(config, task, task_def):
     task_def["payload"] = {
