@@ -59,3 +59,11 @@ def build_githubscript_aptest(config, task, task_def):
     task_def["payload"] = {
         "test-task": task["worker"]["test-task"]
     }
+
+@payload_builder("apdiffscript-diff", schema={
+    Required("diff-task"): taskref_or_string,
+})
+def build_apdiffscript_diff(config, task, task_def):
+    task_def["payload"] = {
+        "diff-task": task["worker"]["diff-task"]
+    }
