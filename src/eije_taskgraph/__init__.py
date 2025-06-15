@@ -33,7 +33,13 @@ def register(graph_config):
             "implementation": "githubscript",
             "os": "scriptworker",
             "worker-type": "githubscript",
-        }
+        },
+        "apdiffscript": {
+            "provisioner": "scriptworker",
+            "implementation": "apdiffscript",
+            "os": "scriptworker",
+            "worker-type": "apdiffscript",
+        },
     }
 
 @run_task_using("argocd-webhook", "argocd-webhook")
