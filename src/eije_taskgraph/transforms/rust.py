@@ -11,6 +11,13 @@ def _package_flag(task):
 
     return ""
 
+def _optimization(task):
+    opt = task.get("skip-unless-changed")
+    if opt is not None:
+        return { "skip-unless-changed": opt }
+
+    return {}
+
 @transforms.add
 def add_rust_tasks(config, tasks):
     run_tasks = []
@@ -30,6 +37,7 @@ def add_rust_tasks(config, tasks):
 
 def lint(config, task):
     package_flag = _package_flag(task)
+    optimizations = _optimization(task)
     name = task["name"]
 
     fmt_task = {
@@ -43,6 +51,7 @@ def lint(config, task):
         },
         "worker-type": task['worker-type-fmt'],
         "description": "Run cargo fmt",
+        "optimization": optimizations,
         "run": {
             "using": "run-task",
             "command": f"cd $VCS_PATH && cargo fmt --check {package_flag}",
@@ -70,6 +79,7 @@ def lint(config, task):
         },
         "worker-type": task['worker-type-build'],
         "description": "Run cargo clippy",
+        "optimization": optimizations,
         "run": {
             "using": "run-task",
             "command": "cd $VCS_PATH && cargo clippy {} {}".format(package_flag, task.get("build-args", "")),
@@ -81,6 +91,7 @@ def lint(config, task):
 
 def build(config, task):
     package_flag = _package_flag(task)
+    optimizations = _optimization(task)
     name = task["name"]
 
     build_task = {
@@ -110,6 +121,7 @@ def build(config, task):
         "run-on-git-branches": ["main", "prod", "ci"],
         "worker-type": task['worker-type-build'],
         "description": "Run cargo build",
+        "optimization": optimizations,
         "run": {
             "using": "run-task",
             "command": "cd $VCS_PATH && cargo build --release {} {}".format(package_flag, task.get("build-args", "")),
@@ -121,6 +133,7 @@ def build(config, task):
 
 def publish(config, task):
     name = task["name"]
+    optimizations = _optimization(task)
 
     publish_task = {
         "name": f"publish-{name}",
@@ -145,6 +158,7 @@ def publish(config, task):
         "description": "Publish docker image",
         "run-on-tasks-for": ["github-push"],
         "run-on-git-branches": ["main", "prod", "ci"],
+        "optimization": optimizations,
         "run": {
             "using": "run-task",
             "command": "bash /usr/local/bin/push_image.sh",
@@ -184,6 +198,7 @@ def argocd_webhook_task(publish_tasks, config):
 
 def tests(config, task):
     package_flag = _package_flag(task)
+    optimizations = _optimization(task)
     name = task["name"]
 
     tests_task = {
@@ -204,6 +219,7 @@ def tests(config, task):
         },
         "worker-type": task['worker-type-build'],
         "description": "Run cargo test",
+        "optimization": optimizations,
         "run": {
             "using": "run-task",
             "command": f"cd $VCS_PATH && cargo test {package_flag}",
