@@ -1,7 +1,5 @@
 from taskgraph.transforms.base import TransformSequence
 from taskgraph.transforms.run import transforms as rt_sequence
-from taskgraph.transforms.docker_image import transforms as docker_sequence
-from voluptuous import Schema, Optional, ALLOW_EXTRA
 
 transforms = TransformSequence()
 
@@ -24,14 +22,18 @@ def add_rust_tasks(config, tasks):
         if task.get('with-tests'):
             run_tasks.extend(tests(config, task))
 
+    publish_tasks = [task for task in run_tasks if task["name"].startswith("publish-")]
+    argocd_webhook = argocd_webhook_task(publish_tasks, config)
+    run_tasks.append(argocd_webhook)
     yield from rt_sequence(config, run_tasks)
 
 
 def lint(config, task):
     package_flag = _package_flag(task)
+    name = task["name"]
 
     fmt_task = {
-        "name": "fmt",
+        "name": f"fmt-{name}",
         "worker": {
             "docker-image": {"in-tree": "rust-builder"},
             "max-run-time": 1800,
@@ -51,7 +53,7 @@ def lint(config, task):
     yield fmt_task
 
     clippy_task = {
-        "name": "clippy",
+        "name": f"clippy-{name}",
         "worker": {
             "docker-image": {"in-tree": "rust-builder"},
             "max-run-time": 1800,
@@ -79,9 +81,10 @@ def lint(config, task):
 
 def build(config, task):
     package_flag = _package_flag(task)
+    name = task["name"]
 
     build_task = {
-        "name": "build",
+        "name": f"build-{name}",
         "worker": {
             "docker-image": {"in-tree": "rust-builder"},
             "env": {
@@ -117,8 +120,10 @@ def build(config, task):
     yield build_task
 
 def publish(config, task):
+    name = task["name"]
+
     publish_task = {
-        "name": "publish",
+        "name": f"publish-{name}",
         "scopes": ["secrets:get:github_deploy"],
         "worker": {
             "docker-image": "ghcr.io/eijebong/taskcluster-images/push-rust-image:main",
@@ -147,7 +152,7 @@ def publish(config, task):
             "use-caches": ["checkout"],
         },
         "dependencies": {
-            "build": "{}-build".format(config.kind),
+            "build": "{}-build-{}".format(config.kind, name),
         },
         "fetches": {
             "build": [
@@ -157,11 +162,15 @@ def publish(config, task):
     }
 
     yield publish_task
-    yield from argocd_webhook_task(publish_task)
 
 
-def argocd_webhook_task(publish_task):
-    yield {
+def argocd_webhook_task(publish_tasks, config):
+    dependencies = {
+        f"{config.kind}-{task['name']}": f"{config.kind}-{task['name']}"
+        for task in publish_tasks
+    }
+
+    return {
         "name": "ArgoCD webhook",
         "description": "",
         "worker-type": "argocd-webhook",
@@ -169,15 +178,16 @@ def argocd_webhook_task(publish_task):
         "run": {
             "using": "argocd-webhook",
         },
-        "dependencies": {"rust-publish": "rust-publish"},
-        "if-dependencies": ["rust-publish"],
+        "dependencies": dependencies,
+        "if-dependencies": list(dependencies.keys()),
     }
 
 def tests(config, task):
     package_flag = _package_flag(task)
+    name = task["name"]
 
     tests_task = {
-        "name": "test",
+        "name": f"test-{name}",
         "worker": {
             "docker-image": {"in-tree": "rust-builder"},
             "max-run-time": 1800,
