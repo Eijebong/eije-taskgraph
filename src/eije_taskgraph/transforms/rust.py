@@ -5,6 +5,14 @@ from voluptuous import Schema, Optional, ALLOW_EXTRA
 
 transforms = TransformSequence()
 
+
+def _package_flag(task):
+    name = task.get('package-name')
+    if name is not None:
+        return f" -p {name}"
+
+    return ""
+
 @transforms.add
 def add_rust_tasks(config, tasks):
     run_tasks = []
@@ -20,6 +28,8 @@ def add_rust_tasks(config, tasks):
 
 
 def lint(config, task):
+    package_flag = _package_flag(task)
+
     fmt_task = {
         "name": "fmt",
         "worker": {
@@ -33,7 +43,7 @@ def lint(config, task):
         "description": "Run cargo fmt",
         "run": {
             "using": "run-task",
-            "command": "cd $VCS_PATH && cargo fmt --check",
+            "command": f"cd $VCS_PATH && cargo fmt --check {package_flag}",
             "use-caches": ["checkout"],
         }
     }
@@ -60,7 +70,7 @@ def lint(config, task):
         "description": "Run cargo clippy",
         "run": {
             "using": "run-task",
-            "command": "cd $VCS_PATH && cargo clippy {}".format(task.get("build-args", "")),
+            "command": "cd $VCS_PATH && cargo clippy {} {}".format(package_flag, task.get("build-args", "")),
             "use-caches": ["checkout", "cargo"],
         }
     }
@@ -68,6 +78,8 @@ def lint(config, task):
     yield clippy_task
 
 def build(config, task):
+    package_flag = _package_flag(task)
+
     build_task = {
         "name": "build",
         "worker": {
@@ -97,7 +109,7 @@ def build(config, task):
         "description": "Run cargo build",
         "run": {
             "using": "run-task",
-            "command": "cd $VCS_PATH && cargo build --release {}".format(task.get("build-args", "")),
+            "command": "cd $VCS_PATH && cargo build --release {} {}".format(package_flag, task.get("build-args", "")),
             "use-caches": ["checkout", "cargo"],
         },
     }
@@ -162,6 +174,8 @@ def argocd_webhook_task(publish_task):
     }
 
 def tests(config, task):
+    package_flag = _package_flag(task)
+
     tests_task = {
         "name": "test",
         "worker": {
@@ -182,7 +196,7 @@ def tests(config, task):
         "description": "Run cargo test",
         "run": {
             "using": "run-task",
-            "command": "cd $VCS_PATH && cargo test",
+            "command": f"cd $VCS_PATH && cargo test {package_flag}",
             "use-caches": ["checkout", "cargo"],
         }
     }
