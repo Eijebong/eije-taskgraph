@@ -17,6 +17,8 @@ transforms.add_validate(SCHEMA)
 
 @transforms.add
 def set_push_environment(config, tasks):
+    should_webhook = True
+
     for task in tasks:
         env = task.setdefault("worker", {}).setdefault("env", {})
         env.update(
@@ -55,12 +57,17 @@ def set_push_environment(config, tasks):
         run["command"] = "bash /usr/local/bin/push_image.sh"
         yield task
 
+        if task.pop("skip-webhook", False):
+            should_webhook = False
+
+    return should_webhook
 
 @transforms.add
 def update_argocd(config, tasks):
     tasks = list(tasks)
-    yield from tasks
-    yield from argocd_webhook_task(tasks)
+    should_webhook = yield from tasks
+    if should_webhook:
+        yield from argocd_webhook_task(tasks)
 
 
 def argocd_webhook_task(tasks):
