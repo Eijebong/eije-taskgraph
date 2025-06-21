@@ -11,12 +11,14 @@ def _package_flag(task):
 
     return ""
 
+
 def _optimization(task):
     opt = task.get("skip-unless-changed")
     if opt is not None:
         return { "skip-unless-changed": opt }
 
     return {}
+
 
 @transforms.add
 def add_rust_tasks(config, tasks):
@@ -168,6 +170,7 @@ def publish(config, task):
         "dependencies": {
             "build": "{}-build-{}".format(config.kind, name),
         },
+        "if-dependencies": ["build"],
         "fetches": {
             "build": [
                 { "artifact": "build-result", "extract": False},
