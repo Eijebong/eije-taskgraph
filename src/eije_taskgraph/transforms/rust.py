@@ -196,7 +196,8 @@ def argocd_webhook_task(publish_tasks, config):
             "using": "argocd-webhook",
         },
         "dependencies": dependencies,
-        "if-dependencies": list(dependencies.keys()),
+        # TODO: Figure out why that still pulls publish-apwm when build-apwm gets yeeted out
+        #"if-dependencies": list(dependencies.keys()),
     }
 
 def tests(config, task):
