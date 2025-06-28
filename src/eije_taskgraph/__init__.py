@@ -80,8 +80,6 @@ def build_apdiffscript_diff(config, task, task_def):
 
 @register_morph
 def handle_very_soft_if_deps(taskgraph, label_to_task_id, parameters, graph_config):
-    to_remove = []
-
     new_edges = set(taskgraph.graph.edges)
     new_tasks = taskgraph.tasks.copy()
 
@@ -93,16 +91,13 @@ def handle_very_soft_if_deps(taskgraph, label_to_task_id, parameters, graph_conf
 
         if not any(very_soft_if_dep in label_to_task_id for very_soft_if_dep in very_soft_if_deps):
             print(f"Removing {task.label} because all its deps are gone")
-            to_remove.append(label_to_task_id[task.label])
+            del new_tasks[label_to_task_id[task.label]]
             continue
 
         for very_soft_if_dep in very_soft_if_deps:
             if very_soft_if_dep in label_to_task_id:
                 new_edges.add((task.task_id, label_to_task_id[very_soft_if_dep], very_soft_if_dep))
                 task.dependencies[very_soft_if_dep] = label_to_task_id[very_soft_if_dep]
-
-    for tid in to_remove:
-        del new_tasks[tid]
 
     new_taskgraph = TaskGraph(new_tasks, Graph(set(new_tasks), new_edges))
     return new_taskgraph, label_to_task_id
