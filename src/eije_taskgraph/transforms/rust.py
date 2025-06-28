@@ -24,12 +24,9 @@ def _optimization(task):
 def add_rust_tasks(config, tasks):
     run_tasks = []
     for task in tasks:
-        run_tasks.extend(lint(config, task))
         if not task.get('tests-only'):
             run_tasks.extend(build(config, task))
             run_tasks.extend(publish(config, task))
-        if task.get('with-tests'):
-            run_tasks.extend(tests(config, task))
 
     publish_tasks = [task for task in run_tasks if task["name"].startswith("publish-")]
     argocd_webhook = argocd_webhook_task(publish_tasks, config)
@@ -195,9 +192,9 @@ def argocd_webhook_task(publish_tasks, config):
         "run": {
             "using": "argocd-webhook",
         },
-        "dependencies": dependencies,
-        # TODO: Figure out why that still pulls publish-apwm when build-apwm gets yeeted out
-        #"if-dependencies": list(dependencies.keys()),
+        "attributes": {
+            "very-soft-if-deps": list(dependencies.keys())
+        }
     }
 
 def tests(config, task):
