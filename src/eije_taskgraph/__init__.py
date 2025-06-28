@@ -97,7 +97,9 @@ def handle_very_soft_if_deps(taskgraph, label_to_task_id, parameters, graph_conf
         for very_soft_if_dep in very_soft_if_deps:
             if very_soft_if_dep in label_to_task_id:
                 new_edges.add((task.task_id, label_to_task_id[very_soft_if_dep], very_soft_if_dep))
-                task.dependencies[very_soft_if_dep] = label_to_task_id[very_soft_if_dep]
+                t = new_tasks[task.task_id]
+                t.task["dependencies"].append(label_to_task_id[very_soft_if_dep])
+                t.dependencies[very_soft_if_dep] = label_to_task_id[very_soft_if_dep]
 
     new_taskgraph = TaskGraph(new_tasks, Graph(set(new_tasks), new_edges))
     return new_taskgraph, label_to_task_id
