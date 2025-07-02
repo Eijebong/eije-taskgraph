@@ -79,6 +79,17 @@ def build_apdiffscript_diff(config, task, task_def):
 
 
 @register_morph
+def remove_checks_on_try(taskgraph, label_to_task_id, parameters, graph_config):
+    is_try = parameters['base_ref'] == "refs/heads/try"
+    for task in taskgraph:
+        routes = task.task.setdefault('routes', [])
+        if is_try and "checks" in routes:
+            routes.remove("checks")
+
+    return taskgraph, label_to_task_id
+
+
+@register_morph
 def handle_very_soft_if_deps(taskgraph, label_to_task_id, parameters, graph_config):
     new_edges = set(taskgraph.graph.edges)
     new_tasks = taskgraph.tasks.copy()
