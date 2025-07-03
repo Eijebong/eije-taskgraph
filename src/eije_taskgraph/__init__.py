@@ -90,6 +90,16 @@ def remove_checks_on_try(taskgraph, label_to_task_id, parameters, graph_config):
 
 
 @register_morph
+def set_try_lowest_priority(taskgraph, label_to_task_id, parameters, graph_config):
+    is_try = parameters['base_ref'] == "refs/heads/try"
+    for task in taskgraph:
+        priority = task.task.get("priority")
+        if is_try and priority in (None, "low", "very-low"):
+            task.task["priority"] = "very-low"
+    return taskgraph, label_to_task_id
+
+
+@register_morph
 def handle_very_soft_if_deps(taskgraph, label_to_task_id, parameters, graph_config):
     new_edges = set(taskgraph.graph.edges)
     new_tasks = taskgraph.tasks.copy()
