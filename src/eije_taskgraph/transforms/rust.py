@@ -22,8 +22,11 @@ def _optimization(task):
 
 @transforms.add
 def add_rust_tasks(config, tasks):
+    skip_webhook = False
+
     run_tasks = []
     for task in tasks:
+        skip_webhook = skip_webhook or task.pop('skip-argocd-webhook', False)
         run_tasks.extend(lint(config, task))
         if not task.get('tests-only'):
             run_tasks.extend(build(config, task))
@@ -32,8 +35,9 @@ def add_rust_tasks(config, tasks):
             run_tasks.extend(tests(config, task))
 
     publish_tasks = [task for task in run_tasks if task["name"].startswith("publish-")]
-    argocd_webhook = argocd_webhook_task(publish_tasks, config)
-    run_tasks.append(argocd_webhook)
+    if not skip_webhook:
+        argocd_webhook = argocd_webhook_task(publish_tasks, config)
+        run_tasks.append(argocd_webhook)
     yield from rt_sequence(config, run_tasks)
 
 
