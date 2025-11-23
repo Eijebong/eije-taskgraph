@@ -1,7 +1,7 @@
 from taskgraph.transforms.run import run_task_using
 from taskgraph.transforms.task import payload_builder, taskref_or_string
 from taskgraph.morph import register_morph
-from voluptuous import Required
+from voluptuous import Required, Optional
 from taskgraph.graph import Graph
 from taskgraph.taskgraph import TaskGraph
 
@@ -67,6 +67,34 @@ def build_githubscript_apdiff(config, task, task_def):
 def build_githubscript_aptest(config, task, task_def):
     task_def["payload"] = {
         "test-task": task["worker"]["test-task"]
+    }
+
+@payload_builder("githubscript-apfuzz", schema={
+    Required("fuzz-tasks"): list,
+    Required("world-name"): str,
+    Required("world-version"): str,
+})
+def build_githubscript_apfuzz(config, task, task_def):
+    task_def["payload"] = {
+        "fuzz-tasks": task["worker"]["fuzz-tasks"],
+        "world-name": task["worker"]["world-name"],
+        "world-version": task["worker"]["world-version"],
+    }
+
+@payload_builder("githubscript-upload-fuzz-results", schema={
+    Required("fuzz-task"): taskref_or_string,
+    Required("fuzz-index-path"): str,
+    Required("world-name"): str,
+    Required("world-version"): str,
+    Required("extra-args"): str,
+})
+def build_githubscript_upload_fuzz_results(config, task, task_def):
+    task_def["payload"] = {
+        "fuzz-task": task["worker"]["fuzz-task"],
+        "fuzz-index-path": task["worker"]["fuzz-index-path"],
+        "world-name": task["worker"]["world-name"],
+        "world-version": task["worker"]["world-version"],
+        "extra-args": task["worker"]["extra-args"],
     }
 
 @payload_builder("apdiffscript-diff", schema={
