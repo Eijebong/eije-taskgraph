@@ -85,7 +85,7 @@ def build_githubscript_apfuzz(config, task, task_def):
 
 @payload_builder("githubscript-upload-fuzz-results", schema={
     Required("fuzz-task"): taskref_or_string,
-    Required("fuzz-index-path"): str,
+    Required("diff-task"): taskref_or_string,
     Required("world-name"): str,
     Required("world-version"): str,
     Required("extra-args"): str,
@@ -93,7 +93,7 @@ def build_githubscript_apfuzz(config, task, task_def):
 def build_githubscript_upload_fuzz_results(config, task, task_def):
     task_def["payload"] = {
         "fuzz-task": task["worker"]["fuzz-task"],
-        "fuzz-index-path": task["worker"]["fuzz-index-path"],
+        "diff-task": task["worker"]["diff-task"],
         "world-name": task["worker"]["world-name"],
         "world-version": task["worker"]["world-version"],
         "extra-args": task["worker"]["extra-args"],
