@@ -71,12 +71,14 @@ def build_githubscript_aptest(config, task, task_def):
 
 @payload_builder("githubscript-apfuzz", schema={
     Required("fuzz-tasks"): list,
+    Required("diff-task"): taskref_or_string,
     Required("world-name"): str,
     Required("world-version"): str,
 })
 def build_githubscript_apfuzz(config, task, task_def):
     task_def["payload"] = {
         "fuzz-tasks": task["worker"]["fuzz-tasks"],
+        "diff-task": task["worker"]["diff-task"],
         "world-name": task["worker"]["world-name"],
         "world-version": task["worker"]["world-version"],
     }
