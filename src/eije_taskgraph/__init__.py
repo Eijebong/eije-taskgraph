@@ -1,9 +1,15 @@
+import logging
+import os
+
 from taskgraph.transforms.run import run_task_using
 from taskgraph.transforms.task import payload_builder, taskref_or_string
 from taskgraph.morph import register_morph
+from taskgraph.util.taskcluster import get_taskcluster_client
 from voluptuous import Required, Optional
 from taskgraph.graph import Graph
 from taskgraph.taskgraph import TaskGraph
+
+logger = logging.getLogger(__name__)
 
 def register(graph_config):
     graph_config['workers']['aliases'] = {
@@ -154,3 +160,33 @@ def handle_very_soft_if_deps(taskgraph, label_to_task_id, parameters, graph_conf
 
     new_taskgraph = TaskGraph(new_tasks, Graph(set(new_tasks), new_edges))
     return new_taskgraph, label_to_task_id
+
+
+@register_morph
+def eager_index_tasks(taskgraph, label_to_task_id, parameters, graph_config):
+    if "TASKCLUSTER_PROXY_URL" not in os.environ:
+        return taskgraph, label_to_task_id
+
+    index = get_taskcluster_client("index")
+
+    for task in taskgraph:
+        eager_routes = task.attributes.get("eager-index-routes", [])
+        if not eager_routes:
+            continue
+
+        expires = task.task.get("expires", task.task.get("deadline"))
+        rank = task.task.get("extra", {}).get("index", {}).get("rank", 0)
+
+        for route in eager_routes:
+            logger.debug(f"Eager-indexing {task.label} at {route}")
+            try:
+                index.insertTask(route, {
+                    "taskId": task.task_id,
+                    "rank": rank,
+                    "data": {},
+                    "expires": expires,
+                })
+            except Exception as e:
+                logger.warning(f"Failed to eager-index {task.label} at {route}: {e}")
+
+    return taskgraph, label_to_task_id
