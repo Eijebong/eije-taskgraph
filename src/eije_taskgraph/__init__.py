@@ -181,7 +181,7 @@ def eager_index_tasks(taskgraph, label_to_task_id, parameters, graph_config):
         rank = task.task.get("extra", {}).get("index", {}).get("rank", 0)
 
         for route in eager_routes:
-            logger.debug(f"Eager-indexing {task.label} at {route}")
+            logger.info(f"Eager-indexing {task.label} at {route}")
             try:
                 index.insertTask(route, {
                     "taskId": task.task_id,
