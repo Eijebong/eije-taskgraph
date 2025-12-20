@@ -4,7 +4,9 @@ import os
 from taskgraph.transforms.run import run_task_using
 from taskgraph.transforms.task import payload_builder, taskref_or_string
 from taskgraph.morph import register_morph
+from taskgraph.util.parameterization import resolve_timestamps
 from taskgraph.util.taskcluster import get_taskcluster_client
+from taskgraph.util.time import current_json_time
 from voluptuous import Required, Optional
 from taskgraph.graph import Graph
 from taskgraph.taskgraph import TaskGraph
@@ -168,13 +170,14 @@ def eager_index_tasks(taskgraph, label_to_task_id, parameters, graph_config):
         return taskgraph, label_to_task_id
 
     index = get_taskcluster_client("index")
+    now = current_json_time(datetime_format=True)
 
     for task in taskgraph:
         eager_routes = task.attributes.get("eager-index-routes", [])
         if not eager_routes:
             continue
 
-        expires = task.task.get("expires", task.task.get("deadline"))
+        expires = resolve_timestamps(now, task.task["expires"])
         rank = task.task.get("extra", {}).get("index", {}).get("rank", 0)
 
         for route in eager_routes:
