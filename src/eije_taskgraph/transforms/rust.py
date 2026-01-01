@@ -78,7 +78,7 @@ def lint(config, task):
             "caches": [
                 {
                     "type": "persistent",
-                    "name": "rust.clippy.{}".format(task["name"]),
+                    "name": "rust.target.{}".format(task["name"]),
                     "mount-point": "/builds/worker/target",
                 },
             ]
@@ -118,7 +118,7 @@ def build(config, task):
             "caches": [
                 {
                     "type": "persistent",
-                    "name": "rust.build.{}".format(task["name"]),
+                    "name": "rust.target.{}".format(task["name"]),
                     "mount-point": "/builds/worker/target",
                 },
             ]
@@ -220,7 +220,7 @@ def tests(config, task):
             "caches": [
                 {
                     "type": "persistent",
-                    "name": "rust.test.{}".format(task["name"]),
+                    "name": "rust.target.{}".format(task["name"]),
                     "mount-point": "/builds/worker/target",
                 },
             ]
