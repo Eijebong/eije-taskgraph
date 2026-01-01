@@ -130,7 +130,7 @@ def build(config, task):
         "optimization": optimizations,
         "run": {
             "using": "run-task",
-            "command": "cd $VCS_PATH && cargo build --release {} {}".format(package_flag, task.get("build-args", "")),
+            "command": "cd $VCS_PATH && cargo build --release {} {} && strip {}".format(package_flag, task.get("build-args", ""), task["build-result]),
             "use-caches": ["checkout", "cargo"],
         },
     }
