@@ -39,11 +39,17 @@ def register(graph_config):
             "os": "scriptworker",
             "worker-type": "argocd-webhook",
         },
-        "githubscript": {
+        "githubscript-1": {
             "provisioner": "scriptworker",
             "implementation": "githubscript",
             "os": "scriptworker",
-            "worker-type": "githubscript",
+            "worker-type": "githubscript-1",
+        },
+        "githubscript-3": {
+            "provisioner": "scriptworker",
+            "implementation": "githubscript",
+            "os": "scriptworker",
+            "worker-type": "githubscript-3",
         },
         "apdiffscript": {
             "provisioner": "scriptworker",
@@ -51,11 +57,11 @@ def register(graph_config):
             "os": "scriptworker",
             "worker-type": "apdiffscript",
         },
-        "publishscript": {
+        "publishscript-3": {
             "provisioner": "scriptworker",
             "implementation": "publishscript",
             "os": "scriptworker",
-            "worker-type": "publishscript",
+            "worker-type": "publishscript-3",
         },
     }
 
