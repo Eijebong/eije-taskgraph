@@ -51,6 +51,12 @@ def register(graph_config):
             "os": "scriptworker",
             "worker-type": "apdiffscript",
         },
+        "publishscript": {
+            "provisioner": "scriptworker",
+            "implementation": "publishscript",
+            "os": "scriptworker",
+            "worker-type": "publishscript",
+        },
     }
 
 @run_task_using("argocd-webhook", "argocd-webhook")
@@ -114,6 +120,22 @@ def build_apdiffscript_diff(config, task, task_def):
     task_def["payload"] = {
         "diff-task": task["worker"]["diff-task"]
     }
+
+@payload_builder("publishscript", schema={
+    Required("pr-number"): int,
+    Required("head-rev"): str,
+    Required("diff-task"): taskref_or_string,
+    Optional("expectations-task"): taskref_or_string,
+})
+def build_publishscript(config, task, task_def):
+    payload = {
+        "pr-number": task["worker"]["pr-number"],
+        "head-rev": task["worker"]["head-rev"],
+        "diff-task": task["worker"]["diff-task"],
+    }
+    if "expectations-task" in task["worker"]:
+        payload["expectations-task"] = task["worker"]["expectations-task"]
+    task_def["payload"] = payload
 
 
 @register_morph
