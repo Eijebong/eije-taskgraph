@@ -139,7 +139,7 @@ def build_publishscript(config, task, task_def):
         "head-rev": task["worker"]["head-rev"],
         "diff-task": task["worker"]["diff-task"],
     }
-    if "expectations-task" in task["worker"]:
+    if task["worker"].get("expectations-task"):
         payload["expectations-task"] = task["worker"]["expectations-task"]
     task_def["payload"] = payload
 
