@@ -2,12 +2,14 @@ import logging
 import os
 
 from taskgraph.transforms.run import run_task_using
-from taskgraph.transforms.task import payload_builder, taskref_or_string
+from typing import Optional as Opt
+
+from taskgraph.transforms.task import payload_builder
 from taskgraph.morph import register_morph
 from taskgraph.util.parameterization import resolve_timestamps
+from taskgraph.util.schema import Schema, taskref_or_string_msgspec
 from taskgraph.util.taskcluster import get_taskcluster_client
 from taskgraph.util.time import current_json_time
-from voluptuous import Required, Optional
 from taskgraph.graph import Graph
 from taskgraph.taskgraph import TaskGraph
 
@@ -73,28 +75,31 @@ def run_webhook(config, task, taskdesc):
 def build_argocd_payload(config, task, task_def):
     pass
 
-@payload_builder("githubscript-apdiff", schema={
-    Required("diff-task"): taskref_or_string,
-})
+class GithubscriptApdiffSchema(Schema, forbid_unknown_fields=False):
+    diff_task: taskref_or_string_msgspec
+
+@payload_builder("githubscript-apdiff", schema=GithubscriptApdiffSchema)
 def build_githubscript_apdiff(config, task, task_def):
     task_def["payload"] = {
         "diff-task": task["worker"]["diff-task"]
     }
 
-@payload_builder("githubscript-aptest", schema={
-    Required("test-task"): taskref_or_string,
-})
+class GithubscriptAptestSchema(Schema, forbid_unknown_fields=False):
+    test_task: taskref_or_string_msgspec
+
+@payload_builder("githubscript-aptest", schema=GithubscriptAptestSchema)
 def build_githubscript_aptest(config, task, task_def):
     task_def["payload"] = {
         "test-task": task["worker"]["test-task"]
     }
 
-@payload_builder("githubscript-apfuzz", schema={
-    Required("fuzz-tasks"): list,
-    Required("diff-task"): taskref_or_string,
-    Required("world-name"): str,
-    Required("world-version"): str,
-})
+class GithubscriptApfuzzSchema(Schema, forbid_unknown_fields=False):
+    fuzz_tasks: list
+    diff_task: taskref_or_string_msgspec
+    world_name: str
+    world_version: str
+
+@payload_builder("githubscript-apfuzz", schema=GithubscriptApfuzzSchema)
 def build_githubscript_apfuzz(config, task, task_def):
     task_def["payload"] = {
         "fuzz-tasks": task["worker"]["fuzz-tasks"],
@@ -103,13 +108,14 @@ def build_githubscript_apfuzz(config, task, task_def):
         "world-version": task["worker"]["world-version"],
     }
 
-@payload_builder("githubscript-upload-fuzz-results", schema={
-    Required("fuzz-task"): taskref_or_string,
-    Required("diff-task"): taskref_or_string,
-    Required("world-name"): str,
-    Required("world-version"): str,
-    Required("extra-args"): str,
-})
+class GithubscriptUploadFuzzResultsSchema(Schema, forbid_unknown_fields=False):
+    fuzz_task: taskref_or_string_msgspec
+    diff_task: taskref_or_string_msgspec
+    world_name: str
+    world_version: str
+    extra_args: str
+
+@payload_builder("githubscript-upload-fuzz-results", schema=GithubscriptUploadFuzzResultsSchema)
 def build_githubscript_upload_fuzz_results(config, task, task_def):
     task_def["payload"] = {
         "fuzz-task": task["worker"]["fuzz-task"],
@@ -119,20 +125,22 @@ def build_githubscript_upload_fuzz_results(config, task, task_def):
         "extra-args": task["worker"]["extra-args"],
     }
 
-@payload_builder("apdiffscript-diff", schema={
-    Required("diff-task"): taskref_or_string,
-})
+class ApdiffscriptDiffSchema(Schema, forbid_unknown_fields=False):
+    diff_task: taskref_or_string_msgspec
+
+@payload_builder("apdiffscript-diff", schema=ApdiffscriptDiffSchema)
 def build_apdiffscript_diff(config, task, task_def):
     task_def["payload"] = {
         "diff-task": task["worker"]["diff-task"]
     }
 
-@payload_builder("publishscript", schema={
-    Required("pr-number"): int,
-    Required("head-rev"): str,
-    Required("diff-task"): taskref_or_string,
-    Optional("expectations-task"): taskref_or_string,
-})
+class PublishscriptSchema(Schema, forbid_unknown_fields=False):
+    pr_number: int
+    head_rev: str
+    diff_task: taskref_or_string_msgspec
+    expectations_task: Opt[taskref_or_string_msgspec] = None
+
+@payload_builder("publishscript", schema=PublishscriptSchema)
 def build_publishscript(config, task, task_def):
     payload = {
         "pr-number": task["worker"]["pr-number"],
