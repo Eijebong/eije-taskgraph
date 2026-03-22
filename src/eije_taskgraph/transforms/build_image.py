@@ -1,12 +1,16 @@
+from typing import Optional
+
 from taskgraph.transforms.base import TransformSequence
-from taskgraph.transforms.docker_image import docker_image_schema
-from voluptuous import Schema, Optional, ALLOW_EXTRA
-docker_image_schema.extra = ALLOW_EXTRA
+from taskgraph.util.schema import Schema
 
 transforms = TransformSequence()
-transforms.add_validate(Schema({
-    Optional("worker-type"): str,
-}, extra = ALLOW_EXTRA))
+
+
+class BuildImageSchema(Schema, forbid_unknown_fields=False, kw_only=True):
+    worker_type: Optional[str] = None
+
+
+transforms.add_validate(BuildImageSchema)
 
 @transforms.add
 def add_container_env(config, tasks):

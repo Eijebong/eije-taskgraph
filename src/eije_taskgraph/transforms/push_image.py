@@ -1,18 +1,15 @@
-import taskgraph
 from taskgraph.transforms.base import TransformSequence
-from voluptuous import Required, ALLOW_EXTRA
 from taskgraph.util.schema import Schema
 
 transforms = TransformSequence()
-SCHEMA = Schema(
-    {
-        Required("repo", description="The fully qualified repo to push the image to."): str,
-        Required("secret", description="The taskcluster secret container `dockerconfigjson` to auth to the repo"): str,
-    },
-    extra=ALLOW_EXTRA
-)
 
-transforms.add_validate(SCHEMA)
+
+class PushImageSchema(Schema, forbid_unknown_fields=False, kw_only=True):
+    repo: str
+    secret: str
+
+
+transforms.add_validate(PushImageSchema)
 
 
 @transforms.add
