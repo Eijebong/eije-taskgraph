@@ -5,6 +5,7 @@ from taskgraph.transforms.run import run_task_using
 from typing import Optional as Opt
 
 from taskgraph.transforms.task import payload_builder
+from taskgraph.util.caches import CACHES, get_checkout_cache_name
 from taskgraph.morph import register_morph
 from taskgraph.util.parameterization import resolve_timestamps
 from taskgraph.util.schema import Schema, taskref_or_string_msgspec
@@ -15,7 +16,17 @@ from taskgraph.taskgraph import TaskGraph
 
 logger = logging.getLogger(__name__)
 
+def _get_checkout_cache_name(config, task):
+    name = get_checkout_cache_name(config, task)
+    project = config.params.get("project", "")
+    if project:
+        return f"{name}-{project}"
+    return name
+
+
 def register(graph_config):
+    CACHES["checkout"]["cache_name"] = _get_checkout_cache_name
+
     graph_config['workers']['aliases'] = {
         "linux-small": {
             "provisioner": "ap",
