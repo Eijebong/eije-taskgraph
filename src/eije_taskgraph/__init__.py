@@ -185,6 +185,20 @@ def set_try_lowest_priority(taskgraph, label_to_task_id, parameters, graph_confi
 
 
 @register_morph
+def set_try_expiry(taskgraph, label_to_task_id, parameters, graph_config):
+    is_try = parameters['base_ref'] == "refs/heads/try"
+    if not is_try:
+        return taskgraph, label_to_task_id
+
+    for task in taskgraph:
+        task.task['expires'] = {'relative-datestamp': '14 days'}
+        for artifact in task.task.get('payload', {}).get('artifacts', {}).values():
+            artifact['expires'] = {'relative-datestamp': '14 days'}
+
+    return taskgraph, label_to_task_id
+
+
+@register_morph
 def handle_very_soft_if_deps(taskgraph, label_to_task_id, parameters, graph_config):
     new_edges = set(taskgraph.graph.edges)
     new_tasks = taskgraph.tasks.copy()
